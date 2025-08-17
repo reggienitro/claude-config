@@ -7,6 +7,7 @@ Personal development environment optimized for AI-assisted development workflows
 - [@.claude/modules/workflow-patterns.md](.claude/modules/workflow-patterns.md)
 - [@.claude/modules/mcp-servers.md](.claude/modules/mcp-servers.md)
 - [@.claude/modules/project-templates.md](.claude/modules/project-templates.md)
+- [@.claude/modules/project-organization.md](.claude/modules/project-organization.md)
 
 ## 🚨 CRITICAL: ASK QUESTIONS BEFORE BUILDING
 **MANDATORY FOR ALL PROJECT/APP DEVELOPMENT:**
