@@ -1,0 +1,39 @@
+{
+  "workflowEnforcement": {
+    "requireTestsBeforeCommit": true,
+    "enforceConventionalCommits": true,
+    "requireDocumentationUpdates": true,
+    "blockCommitsWithoutTests": false,
+    "reminderFrequency": "always"
+  },
+  "sessionManagement": {
+    "autoCreateHandoffFiles": true,
+    "sessionTimeoutMinutes": 120,
+    "autoSaveStateInterval": 30,
+    "continueSessionOnRestart": true
+  },
+  "qualityGates": {
+    "lintingRequired": ["*.js", "*.ts", "*.py"],
+    "testingRequired": ["src/**/*"],
+    "documentationRequired": ["public APIs", "new features"],
+    "securityReviewRequired": ["auth", "database", "api keys"]
+  },
+  "notifications": {
+    "showProgressIndicators": true,
+    "verboseLogging": false,
+    "errorNotifications": true,
+    "successNotifications": true
+  },
+  "performance": {
+    "maxContextLines": 2000,
+    "enableLazyLoading": true,
+    "cacheFrequentlyUsed": true,
+    "optimizeTokenUsage": true
+  },
+  "customCommands": {
+    "enableCustomCommands": true,
+    "commandDirectory": ".claude/commands",
+    "autoloadCommands": true,
+    "commandTimeout": 300
+  }
+}

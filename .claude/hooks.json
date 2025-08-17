@@ -1,0 +1,43 @@
+{
+  "hooks": {
+    "preToolUse": [
+      {
+        "match": { "tool": "Write" },
+        "command": "echo '🔍 Pre-write check: Does this file need tests or documentation updates?' && sleep 1"
+      },
+      {
+        "match": { "tool": "MultiEdit" },
+        "command": "echo '📝 Pre-edit check: Consider impact on other files and tests' && sleep 1"
+      },
+      {
+        "match": { "tool": "Bash", "args": "git commit" },
+        "command": "echo '🚨 Pre-commit check: Are all issues addressed? Run tests? [Enter to continue, Ctrl+C to cancel]' && read -t 10"
+      }
+    ],
+    "postToolUse": [
+      {
+        "match": { "tool": "Write" },
+        "command": "echo '✅ File written. Consider: Does this need tests? Documentation? Related file updates?'"
+      },
+      {
+        "match": { "tool": "MultiEdit" },
+        "command": "echo '✅ Files modified. Next: Run tests, check for side effects, update docs if needed'"
+      },
+      {
+        "match": { "tool": "Bash", "args": "git commit" },
+        "command": "echo '✅ Commit created. Next: Push to remote? Update task status? Create PR?'"
+      }
+    ],
+    "onError": [
+      {
+        "match": { "tool": "*" },
+        "command": "echo '❌ Error occurred. Document the issue and potential solutions for future reference.'"
+      }
+    ]
+  },
+  "settings": {
+    "enableHooks": true,
+    "timeoutSeconds": 10,
+    "skipOnQuickMode": false
+  }
+}
