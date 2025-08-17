@@ -131,9 +131,10 @@
 
 ### Repositories
 - [Claude Config](https://github.com/reggienitro/claude-config)
-- Article-to-Audio (needs GitHub)
-- Bee-Supabase Integration (needs GitHub)
-- Personal Data Lake (needs GitHub)
+- [Article-to-Audio Extension](https://github.com/reggienitro/article-to-audio-extension)
+- [Bee-Supabase Integration](https://github.com/reggienitro/bee-supabase-integration)
+- [Personal Data Lake](https://github.com/reggienitro/personal-data-lake)
+- [Knowledge Scraper](https://github.com/reggienitro/knowledge-scraper)
 
 ### Documentation
 - [Project Organization Standards](./claude/modules/project-organization.md)
