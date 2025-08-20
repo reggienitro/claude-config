@@ -4,6 +4,7 @@
 Personal development environment optimized for AI-assisted development workflows across multiple devices.
 
 ## Import Modules
+- [@.claude/modules/self-correction.md](.claude/modules/self-correction.md)
 - [@.claude/modules/workflow-patterns.md](.claude/modules/workflow-patterns.md)
 - [@.claude/modules/mcp-servers.md](.claude/modules/mcp-servers.md)
 - [@.claude/modules/project-templates.md](.claude/modules/project-templates.md)
