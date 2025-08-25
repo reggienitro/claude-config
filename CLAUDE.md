@@ -107,8 +107,8 @@ git pull && cp CLAUDE.md /path/to/project/
 
 ---
 
-**Last updated**: 2025-08-17  
-**Version**: 2.1 (Post-Reorganization)  
-**Total MCP Servers**: 12 (All Documented)  
+**Last updated**: 2025-08-25  
+**Version**: 2.2  
+**Total MCP Servers**: 15 (All Documented)  
 **Custom Commands**: 5  
-**Major Projects**: Reorganized & Following Standards
+**Active Projects**: 10 (5 on GitHub, 5 local)

@@ -1,6 +1,6 @@
 # GitHub Repositories Overview
 
-*Last Updated: 2025-08-17*
+*Last Updated: 2025-08-25*
 
 ## 🚀 **Active Projects**
 
@@ -8,8 +8,8 @@
 - **Repository**: https://github.com/reggienitro/claude-config
 - **Status**: ✅ Active & Updated
 - **Purpose**: Modular Claude Code configuration with cross-device sync
-- **Features**: 12 MCP servers, 5 custom commands, project organization standards
-- **Last Update**: 2025-08-17 (v2.1 Post-Reorganization)
+- **Features**: 15 MCP servers, 5 custom commands, project organization standards
+- **Last Update**: 2025-08-25 (v2.2)
 
 ### 2. **Article-to-Audio Extension**
 - **Repository**: https://github.com/reggienitro/article-to-audio-extension
@@ -27,10 +27,11 @@
 
 ### 4. **Personal Data Lake**
 - **Repository**: https://github.com/reggienitro/personal-data-lake
-- **Status**: 🔄 Architecture Complete (Phase 1)
+- **Status**: 🔄 Architecture Phase - Tool Selection
 - **Purpose**: AI-powered personal analytics across all life data
-- **Features**: Calendar, health, email, behavioral data integration with AI insights
-- **Next**: Calendar and health data integration
+- **Features**: Flexible architecture supporting multiple tools (Notion/Obsidian/others)
+- **Next**: Evaluate and select calendar/note-taking tool integration approach
+- **Note**: Calendar integration approach TBD (considering Notion, Obsidian, or other tools)
 
 ### 5. **Knowledge Scraper**
 - **Repository**: https://github.com/reggienitro/knowledge-scraper
@@ -39,19 +40,57 @@
 - **Features**: AutoRabit agent template, Docker deployment, Q&A system
 - **Next**: Template generalization for other knowledge bases
 
+### 6. **Dev Environment Health Check**
+- **Repository**: https://github.com/reggienitro/dev-env-health-check
+- **Status**: ✅ Production Ready (Globally Installed)
+- **Purpose**: Automated validation of development environment
+- **Features**: MCP server checks, API validation, database connectivity, daily automation
+- **Last Update**: 2025-08-20
+- **Usage**: `dehc check --mode detailed`
+
+### 7. **Enterprise Agents**
+- **Repository**: https://github.com/reggienitro/enterprise-agents
+- **Status**: ✅ Active Development
+- **Purpose**: Advanced orchestration and automation scripts for Claude
+- **Features**: Multi-agent coordination, task handoff, quality checks, context management
+- **Next**: Documentation and standardization
+
+### 8. **Perplexity MCP Server**
+- **Repository**: Local only (~/AI projects/claude-tools/perplexity-mcp-server)
+- **Status**: ✅ Working
+- **Purpose**: Research-enhanced MCP server for Claude
+- **Features**: Caching, research routing, enhanced search capabilities
+- **Next**: Consider GitHub repository
+
+### 9. **Notion-Supabase Integration**
+- **Repository**: Local only (~/AI projects/claude-tools/notion-supabase-integration)
+- **Status**: 🔄 Early Development
+- **Purpose**: Sync Notion workspace with Supabase for analytics
+- **Features**: Database sync, search capabilities
+- **Next**: Architecture refinement
+
+### 10. **Real AI Agents**
+- **Repository**: Local only (~/AI projects/claude-tools/real-ai-agents)
+- **Status**: 🔬 Experimental
+- **Purpose**: Multi-agent system with autonomous AI coordination
+- **Features**: claude.py orchestrator, multi-agent communication
+- **Next**: Testing and refinement
+
 ## 📊 **Repository Stats**
 
-### **Total Repositories**: 5
+### **Total Repositories**: 10
 - **Configuration**: 1 (claude-config)
-- **Claude Tools**: 2 (article-to-audio, knowledge-scraper)
-- **Automation Tools**: 2 (bee-supabase, personal-data-lake)
+- **Claude Tools**: 5 (article-to-audio, knowledge-scraper, perplexity-mcp, notion-supabase, real-ai-agents)
+- **Automation Tools**: 3 (bee-supabase, personal-data-lake, enterprise-agents)
+- **Development Tools**: 1 (dev-env-health-check)
 
 ### **Development Status**
-- **Production Ready**: 3 (claude-config, bee-supabase, knowledge-scraper)
+- **Production Ready**: 4 (claude-config, bee-supabase, knowledge-scraper, dev-env-health-check)
 - **Near Complete**: 1 (article-to-audio - 95%)
-- **Active Development**: 1 (personal-data-lake - Phase 1)
+- **Active Development**: 3 (personal-data-lake, enterprise-agents, notion-supabase)
+- **Experimental**: 2 (perplexity-mcp, real-ai-agents)
 
-### **Lines of Code**: ~15,000+ across all projects
+### **Lines of Code**: ~25,000+ across all projects
 
 ## 🔧 **Repository Management**
 

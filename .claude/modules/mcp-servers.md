@@ -2,7 +2,7 @@
 
 ## Installed Tools & Capabilities
 
-### MCP Servers Available (12 Total)
+### MCP Servers Available (15 Total)
 
 #### Core Infrastructure
 - **filesystem**: Local file operations
@@ -22,6 +22,10 @@
 - **memory**: Persistent context and knowledge storage across sessions
 - **task-master-ai**: Project and task management with PRD parsing
 - **bee-supabase**: Integration between Bee.computer data and Supabase database
+
+#### Productivity & Calendar
+- **apple-calendar**: Natural language Apple Calendar management for macOS
+- **outlook-mcp**: Comprehensive Microsoft Outlook and Teams integration (75+ tools)
 
 Additional servers can be installed via `mcp-installer`
 

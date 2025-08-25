@@ -88,6 +88,15 @@ claude-tools/article-to-audio-extension/
 - Multiple language environments (Python, Node.js, etc.)
 - Testing frameworks appropriate to each project
 - Docker for containerization when needed
+- **dev-env-health-check** (`dehc`): Environment validation tool
+  - Validates MCP servers, API keys, databases
+  - Multiple output modes (quick/detailed/comprehensive/JSON)
+  - Built-in automation and daily monitoring
+  - GitHub: https://github.com/reggienitro/dev-env-health-check
+- **Enterprise Agents**: Orchestration scripts for complex workflows
+  - `claude-orchestrator.sh`: Multi-agent coordination
+  - `claude-handoff.sh`: Session transfer and continuity
+  - `claude-quality-advanced.sh`: Code quality checks
 
 ## Project-Specific Instructions
 
