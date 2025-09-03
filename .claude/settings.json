@@ -35,5 +35,13 @@
     "commandDirectory": ".claude/commands",
     "autoloadCommands": true,
     "commandTimeout": 300
+  },
+  "policyCompatibility": {
+    "preamblesRequired": "allowed",
+    "commitPolicy": "ask-before-commit",
+    "customCommands": "advisory",
+    "hooksExecution": "advisory",
+    "mcpAvailability": "online-enforced",
+    "pathsAreMachineSpecific": true
   }
 }
