@@ -18,6 +18,60 @@ Personal development environment optimized for AI-assisted development workflows
 - **Stop and ask** rather than making assumptions about features, UI/UX, or technical architecture
 - **This is mandatory** - I'd rather answer 10 questions than debug wrong assumptions or rebuild incorrectly
 
+## 📝 OPTIMAL PROMPT STRUCTURE TEMPLATE
+**USE THIS TEMPLATE FOR ALL COMPLEX TASKS TO AVOID TECH DEBT:**
+
+When I ask you to build something, structure my request like this:
+
+1. **Source & Target Identification**
+   - Exact IDs, URLs, or file paths (no guessing)
+   - Verify source exists and is accessible
+   - Confirm target structure and permissions
+
+2. **Data Structure Definition**
+   - List ALL properties with exact names and types
+   - Specify select vs multi_select vs other field types
+   - Define any relationships or dependencies
+
+3. **Requirements (Be Explicit)**
+   - Core functionality requirements
+   - Data processing rules (DON'T guess, fetch from source)
+   - Error handling expectations
+   - Performance constraints (batch sizes, timeouts)
+
+4. **Technical Specifications**
+   - Which APIs/libraries to use (and versions if critical)
+   - Authentication methods and credentials location
+   - Rate limiting and retry strategies
+   - Progress tracking requirements
+
+5. **Success Criteria**
+   - What the final result should look like
+   - How to verify it worked correctly
+   - Any post-processing or cleanup needed
+
+**Example of a Good Prompt:**
+```
+I have [source type] at [exact location/ID] containing [data description].
+I need to [action verb] this to [target type] at [exact location/ID].
+
+Target structure:
+- Field1 (type): description
+- Field2 (type): description
+[etc...]
+
+Requirements:
+1. Extract/fetch [specific data] from [source]
+2. Transform by [specific rules]
+3. Process in batches of [X] with [Y]ms delay
+4. Track progress in [format/location]
+5. Handle errors by [strategy]
+
+DO NOT [list of things not to do/assume]
+```
+
+This prevents back-and-forth debugging and ensures first-time success.
+
 ## Core Principles
 
 ### Communication Style
@@ -89,6 +143,17 @@ cp CLAUDE.md /path/to/project/
 git pull && cp CLAUDE.md /path/to/project/
 ```
 
+## Platform Compatibility
+
+- Mode: Online Mode by default; no offline fallback. Require explicit approvals for commits and any risky actions.
+
+- Preambles: Some environments require brief preambles before tool use. Allow concise (1–2 sentence) preambles when the host mandates them.
+- Commits: Frequent commits are preferred, but follow host policy. If commits are restricted, ask for approval before committing.
+- Custom Commands: `/safe-commit`, `/status-check`, `/quick-spec`, `/morning-standup`, `/end-of-day` are conceptual unless implemented by the host. Treat them as specs when no runner exists.
+- Hooks: `.claude/hooks.json` is advisory unless integrated with an execution runner.
+- MCP Availability: Online mode enforced. If MCP servers are unavailable or network is restricted, pause and request guidance; do not proceed offline.
+- Paths: Hardcoded paths (e.g., `/Users/aettefagh/...`) are machine-specific. Adjust for the current system or parameterize.
+
 ## Security & Privacy
 
 ### API Key Management
@@ -109,6 +174,6 @@ git pull && cp CLAUDE.md /path/to/project/
 
 **Last updated**: 2025-08-25  
 **Version**: 2.2  
-**Total MCP Servers**: 15 (All Documented)  
+**Total MCP Servers**: 16 (All Documented)  
 **Custom Commands**: 5  
 **Active Projects**: 10 (5 on GitHub, 5 local)
