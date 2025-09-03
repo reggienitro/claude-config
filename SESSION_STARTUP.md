@@ -28,6 +28,13 @@ cp /Users/aettefagh/claude-config/CLAUDE.md ./
 git init
 ```
 
+### MCP Unavailable (Online Mode Enforced)
+If MCP servers or custom command runners are unavailable:
+1. Pause work and request guidance. Do not proceed offline.
+2. Perform minimal verification only (collect diagnostics): `git status`, `python3 -V`, `node -v`, `gh auth status`.
+3. Capture runner/server logs or errors and surface them for resolution.
+4. Resume only after an MCP runner and required servers are available and approved.
+
 ## Emergency Recovery
 If configuration isn't working:
 1. `git pull` in `/Users/aettefagh/claude-config/`
