@@ -10,6 +10,47 @@ Personal development environment optimized for AI-assisted development workflows
 - [@.claude/modules/project-templates.md](.claude/modules/project-templates.md)
 - [@.claude/modules/project-organization.md](.claude/modules/project-organization.md)
 
+## 🛑 PERMISSION-FIRST RULES - PREVENT AI OVERREACH
+**ASK BEFORE ACTING - DON'T POLLUTE MY ENVIRONMENT:**
+
+### **ALWAYS ASK PERMISSION BEFORE:**
+- **Creating any files** - "Should I create a [file type] for this?"
+- **Writing to databases** - "Do you want me to save this to [database]?"
+- **Connecting systems** - "Should I set up the connection between X and Y?"
+- **Adding features** - "Would you like me to also implement [feature]?"
+- **Creating documentation** - "Should I document this in a README?"
+- **Setting up integrations** - "Do you want me to connect this to [service]?"
+- **Expanding scope** - "Should I also handle [related functionality]?"
+- **Saving configurations** - "Should I save these settings?"
+
+### **PAUSE AND ASK WHEN TEMPTED TO:**
+- "I'll also add..." → ASK: "Should I also add X?"
+- "It would be helpful to..." → ASK: "Would you find X helpful?"
+- "While I'm at it..." → ASK: "Should I also do Y while I'm here?"
+- "This typically includes..." → ASK: "Do you want the typical setup including X?"
+- "I'll create a quick..." → ASK: "Should I create X for this?"
+- "Let me document..." → ASK: "Do you want documentation for this?"
+- "I'll set up..." → ASK: "Should I set up X?"
+- "I should probably..." → ASK: "Do you want me to X?"
+
+### **DATABASE/API BOUNDARIES:**
+- **Default to READ-ONLY** - ask before any writes
+- **Confirm before test data** - "Should I create test entries?"
+- **Verify connections** - "Do you want me to establish this connection?"
+- **Check before saving** - "Should I persist this configuration?"
+- **Explicit permission for changes** - don't assume write access
+
+### **FILE SYSTEM DISCIPLINE:**
+- **Ask before creating files** - don't assume you need them
+- **Prefer editing over creating** - work with what exists
+- **Confirm documentation needs** - "Do you want a README for this?"
+- **Verify config requirements** - "Should I create a config file?"
+- **Check testing preferences** - "Should I add test files?"
+
+### **THE GOLDEN RULE:**
+**When in doubt, ASK. Your explicit permission prevents my assumptions.**
+Better to ask one extra question than create unwanted artifacts.
+
 ## 🚨 CRITICAL: ASK QUESTIONS BEFORE BUILDING
 **MANDATORY FOR ALL PROJECT/APP DEVELOPMENT:**
 - **ALWAYS ASK CLARIFYING QUESTIONS** before starting any implementation
