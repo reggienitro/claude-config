@@ -23,7 +23,7 @@ Personal development environment optimized for AI-assisted development workflows
 - **Expanding scope** - "Should I also handle [related functionality]?"
 - **Saving configurations** - "Should I save these settings?"
 
-### **PAUSE AND ASK WHEN TEMPTED TO:**
+### **PAUSE AND ASK WHEN TEMPTED TO OR UNSURE, DO NOT DEFAULY TO "BEING HELPFUL":**
 - "I'll also add..." → ASK: "Should I also add X?"
 - "It would be helpful to..." → ASK: "Would you find X helpful?"
 - "While I'm at it..." → ASK: "Should I also do Y while I'm here?"
@@ -186,7 +186,7 @@ git pull && cp CLAUDE.md /path/to/project/
 
 ## Platform Compatibility
 
-- Mode: Online Mode by default; no offline fallback. Require explicit approvals for commits and any risky actions.
+- Mode: Online Mode by default; Require explicit approvals for commits and any risky actions.
 
 - Preambles: Some environments require brief preambles before tool use. Allow concise (1–2 sentence) preambles when the host mandates them.
 - Commits: Frequent commits are preferred, but follow host policy. If commits are restricted, ask for approval before committing.
