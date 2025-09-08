@@ -1,220 +1,145 @@
-# Personal Claude Code Configuration
+# Personal Claude Code Configuration (Master)
 
-## About Me
-Personal development environment optimized for AI-assisted development workflows across multiple devices.
+## About
+Portable, permission-first development instructions for AI-assisted work across projects and devices. Keep this as the single source of truth and sync into each repo or workspace as needed.
 
-## Import Modules
-- [@.claude/modules/self-correction.md](.claude/modules/self-correction.md)
-- [@.claude/modules/workflow-patterns.md](.claude/modules/workflow-patterns.md)
-- [@.claude/modules/mcp-servers.md](.claude/modules/mcp-servers.md)
-- [@.claude/modules/project-templates.md](.claude/modules/project-templates.md)
-- [@.claude/modules/project-organization.md](.claude/modules/project-organization.md)
+## 🛑 Permission-First Rules
+Always ask before taking actions that change my environment.
 
-## 🛑 PERMISSION-FIRST RULES - PREVENT AI OVERREACH
-**ASK BEFORE ACTING - DON'T POLLUTE MY ENVIRONMENT:**
+- Create files: Ask before scaffolding code, tests, docs, configs.
+- Edit configs: Confirm before changing tool settings or auth.
+- Connect systems: Ask before wiring services, APIs, or webhooks.
+- Write to DBs/APIs: Default to read-only; confirm before writes.
+- Install deps: Confirm package additions/versions and lockfile changes.
+- Expand scope: Ask before adding “helpful” extras or patterns.
+- Persist state: Ask before saving sessions, caches, or artifacts.
 
-### **ALWAYS ASK PERMISSION BEFORE:**
-- **Creating any files** - "Should I create a [file type] for this?"
-- **Writing to databases** - "Do you want me to save this to [database]?"
-- **Connecting systems** - "Should I set up the connection between X and Y?"
-- **Adding features** - "Would you like me to also implement [feature]?"
-- **Creating documentation** - "Should I document this in a README?"
-- **Setting up integrations** - "Do you want me to connect this to [service]?"
-- **Expanding scope** - "Should I also handle [related functionality]?"
-- **Saving configurations** - "Should I save these settings?"
+Boundary quick-checks:
+- File system: Prefer editing existing files; do not create unless approved.
+- Network: Confirm calls that hit external services or download packages.
+- Secrets: Never write, echo, or log secrets; use env vars and `.env.local`.
+- Destructive ops: Deletions, migrations, or resets require explicit consent.
 
-### **PAUSE AND ASK WHEN TEMPTED TO OR UNSURE, DO NOT DEFAULY TO "BEING HELPFUL":**
-- "I'll also add..." → ASK: "Should I also add X?"
-- "It would be helpful to..." → ASK: "Would you find X helpful?"
-- "While I'm at it..." → ASK: "Should I also do Y while I'm here?"
-- "This typically includes..." → ASK: "Do you want the typical setup including X?"
-- "I'll create a quick..." → ASK: "Should I create X for this?"
-- "Let me document..." → ASK: "Do you want documentation for this?"
-- "I'll set up..." → ASK: "Should I set up X?"
-- "I should probably..." → ASK: "Do you want me to X?"
+## ❓ Ask Before Building
+Before implementing anything non-trivial, confirm requirements with targeted questions. Do not proceed on assumptions.
 
-### **DATABASE/API BOUNDARIES:**
-- **Default to READ-ONLY** - ask before any writes
-- **Confirm before test data** - "Should I create test entries?"
-- **Verify connections** - "Do you want me to establish this connection?"
-- **Check before saving** - "Should I persist this configuration?"
-- **Explicit permission for changes** - don't assume write access
+- Purpose: Who is it for? What problem and success criteria?
+- Scope: Exact feature set, out-of-scope items, acceptance tests.
+- Constraints: Platforms, performance, privacy, budget, deadlines.
+- Interfaces: Inputs/outputs, schemas, endpoints, events.
+- Environment: Runtime, tools, versions, deployment targets.
+- Data: Sources of truth, ownership, structure, retention.
 
-### **FILE SYSTEM DISCIPLINE:**
-- **Ask before creating files** - don't assume you need them
-- **Prefer editing over creating** - work with what exists
-- **Confirm documentation needs** - "Do you want a README for this?"
-- **Verify config requirements** - "Should I create a config file?"
-- **Check testing preferences** - "Should I add test files?"
+## 🧱 Optimal Prompt Structure (for complex tasks)
+Use this when I ask for builds/migrations/integrations.
 
-### **THE GOLDEN RULE:**
-**When in doubt, ASK. Your explicit permission prevents my assumptions.**
-Better to ask one extra question than create unwanted artifacts.
+1) Source and Target
+- Exact IDs, URLs, file paths; verify access/permissions.
 
-## 🚨 CRITICAL: ASK QUESTIONS BEFORE BUILDING
-**MANDATORY FOR ALL PROJECT/APP DEVELOPMENT:**
-- **ALWAYS ASK CLARIFYING QUESTIONS** before starting any implementation
-- **NEVER assume requirements** - ask about functionality, user experience, technical constraints, deployment targets
-- **Question everything**: What's the specific use case? What's the target audience? What platforms? What's the expected workflow?
-- **Stop and ask** rather than making assumptions about features, UI/UX, or technical architecture
-- **This is mandatory** - I'd rather answer 10 questions than debug wrong assumptions or rebuild incorrectly
+2) Data Structures
+- List all fields with names, types, allowed values, relations.
 
-## 📝 OPTIMAL PROMPT STRUCTURE TEMPLATE
-**USE THIS TEMPLATE FOR ALL COMPLEX TASKS TO AVOID TECH DEBT:**
+3) Requirements
+- Core behavior, edge cases, error handling, performance limits.
 
-When I ask you to build something, structure my request like this:
+4) Technical Specs
+- Libraries/APIs (and versions if critical), auth method/location, rate limits/retries, progress tracking.
 
-1. **Source & Target Identification**
-   - Exact IDs, URLs, or file paths (no guessing)
-   - Verify source exists and is accessible
-   - Confirm target structure and permissions
+5) Success Criteria
+- What “done” looks like, verification steps, post-processing/cleanup.
 
-2. **Data Structure Definition**
-   - List ALL properties with exact names and types
-   - Specify select vs multi_select vs other field types
-   - Define any relationships or dependencies
-
-3. **Requirements (Be Explicit)**
-   - Core functionality requirements
-   - Data processing rules (DON'T guess, fetch from source)
-   - Error handling expectations
-   - Performance constraints (batch sizes, timeouts)
-
-4. **Technical Specifications**
-   - Which APIs/libraries to use (and versions if critical)
-   - Authentication methods and credentials location
-   - Rate limiting and retry strategies
-   - Progress tracking requirements
-
-5. **Success Criteria**
-   - What the final result should look like
-   - How to verify it worked correctly
-   - Any post-processing or cleanup needed
-
-**Example of a Good Prompt:**
+Example
 ```
-I have [source type] at [exact location/ID] containing [data description].
-I need to [action verb] this to [target type] at [exact location/ID].
-
-Target structure:
-- Field1 (type): description
-- Field2 (type): description
-[etc...]
+Source: Google Sheet at <url> with columns A..F.
+Target: Postgres table `leads` in DATABASE_URL.
 
 Requirements:
-1. Extract/fetch [specific data] from [source]
-2. Transform by [specific rules]
-3. Process in batches of [X] with [Y]ms delay
-4. Track progress in [format/location]
-5. Handle errors by [strategy]
+1) Fetch rows where `status = 'new'`.
+2) Transform columns A..F into fields {email, name, plan, ...}.
+3) Batch insert in 200-row chunks with 250ms delay.
+4) Log progress to stdout and write a summary JSON.
+5) Retry 429/5xx up to 3 times with backoff.
 
-DO NOT [list of things not to do/assume]
+Do not create tables or write test data without confirmation.
 ```
 
-This prevents back-and-forth debugging and ensures first-time success.
+## 🤝 Collaboration Preferences
 
-## Core Principles
+Communication
+- Be concise and precise; prefer bullets over paragraphs.
+- Skip preambles like “I’ll help you…”; go straight to actions.
+- Ask clarifying questions early; challenge assumptions with options.
+- Provide short, verifiable plans before coding.
 
-### Communication Style
-- Be concise but precise - I prefer explanations of what's being done
-- Planning, structuring, and strategizing before building anything is essential
-- Make it a high priority to ask clarifying questions to better refine projects
-- Skip preambles like "I'll help you..." or "Let me..."
-- Use bullet points for multiple items
-- One-line answers are perfect for simple questions
-- **Challenge my thinking** - Present alternatives and explain your reasoning
+Code Style
+- Clean, readable, self-documenting code; small, focused modules.
+- Prefer functional patterns where appropriate; avoid side effects.
+- Tests when applicable; validate behavior with minimal fixtures.
+- Consistent naming, clear file structure; avoid “god” files.
 
-### Code Style Preferences
-- Write clean, self-documenting code
-- Comments are appreciated to explain and document
-- Prefer functional approaches where appropriate
-- Test-driven development when applicable
-- Commit often, unit and regression test often
-- Employ good file structure and naming conventions
+Workflow
+- Break complex work into small tasks with acceptance notes.
+- Mark tasks complete as soon as finished; maintain momentum.
+- Conventional commits: feat/fix/docs/style/refactor/test/chore.
+- Leave crisp TODOs when handing off or pausing.
 
-### Workflow Preferences
-- Break complex tasks into subtasks immediately
-- Mark tasks complete as soon as finished
-- Create comprehensive git commits with clear messages
-- Use conventional commit format: feat/fix/docs/style/refactor/test/chore
+## ⚡ Quick Reference
 
-## Quick Reference
+Planning
+- “Plan first, then implement”: Outline steps, confirm, execute.
+- Use one-liners for simple questions; bullets for multi-part.
 
-### Custom Commands Available
-- `/safe-commit "message"` - Automated quality checks + commit
-- `/status-check` - Comprehensive system verification
-- `/quick-spec "idea"` - Rapid project specification generation
-- `/morning-standup` - Daily session initialization
-- `/end-of-day` - Session wrap-up with handoff preparation
+Emergency
+- `git status && git stash -u` to snapshot work quickly.
+- `gh auth status` to verify GitHub auth.
+- Health checks: lint/tests/build where available.
 
-### Emergency Commands
-```bash
-task-master next                    # Get next priority task
-python3 setup_bee_supabase.py      # Verify database connections
-git status && git stash            # Save work quickly
-gh auth status                     # Check GitHub connection
-```
+Session Flow
+- Start: summarize context → confirm goals → propose steps.
+- During: small PRs/patches → validate locally → adjust plan.
+- End: summarize changes, decisions, and next tasks.
 
-### Most-Used Workflows
-1. **New Project**: `/quick-spec` → requirements gathering → implementation
-2. **Daily Dev**: `/morning-standup` → code → `/safe-commit` → `/end-of-day`
-3. **Session Recovery**: Check SESSION_HANDOFF_*.md → `/status-check`
+## 🔒 Boundaries & Safety
+- Files: Don’t create/move/rename without explicit OK; prefer patches.
+- Network: Confirm package installs and external downloads.
+- Datastores: Ask before writes/seeding; require dry-run if possible.
+- Secrets: Never expose; use placeholders and documented env vars.
+- Destructive: Deletions/migrations need a plan + confirmation.
 
-### Task Management (via Task Master)
-- Use `task-master` commands for project organization
-- Parse PRDs with `task-master parse-prd`
-- Track progress with `task-master list` and `task-master next`
-- Expand tasks with `task-master expand --research`
+## 🧭 Modes of Operation
+- Discovery mode: inventory code, list entry points, identify patterns, surface risks; ask questions.
+- Spec mode: write concise specs with file paths, interfaces, acceptance tests.
+- Build mode: implement smallest viable slice with tests; iterate.
+- Debug mode: reproduce, isolate, add targeted logs/tests, fix, verify.
 
-## Multi-Device Sync
+## 📦 Project Modules (optional)
 
-### This Repository
-- **GitHub**: https://github.com/reggienitro/claude-config
-- **Purpose**: Sync Claude configuration across devices
-- **Usage**: Clone → copy CLAUDE.md to project → customize as needed
+ML / Fine-Tuning
+- Activate env first; confirm framework (e.g., LLaMA-Factory) and versions.
+- Track experiments (wandb/tensorboard); record hyperparameters/results.
+- Use small sanity datasets before full runs.
+- Keep configs + scripts versioned; avoid one-off notebooks unless exploratory.
 
-### Syncing Process
-```bash
-# On new device
-git clone https://github.com/reggienitro/claude-config.git
-cd claude-config
-cp CLAUDE.md /path/to/project/
+Web / App Dev
+- Inspect `package.json` scripts; run tests before commits when present.
+- Follow existing component/route patterns; avoid unnecessary scaffolding.
+- Confirm API schemas and contracts; add contract tests if useful.
+- Keep deployment targets in mind (Vercel, Docker, etc.).
 
-# To update
-git pull && cp CLAUDE.md /path/to/project/
-```
+## 🧪 Validation
+- Start specific: test what you changed; then broaden.
+- Prefer fast feedback: unit tests > integration > e2e (when possible).
+- Log minimally and intentionally; remove noisy debug output before handoff.
 
-## Platform Compatibility
+## 📝 Handoff Template
+Include this when pausing or finishing a chunk of work.
 
-- Mode: Online Mode by default; Require explicit approvals for commits and any risky actions.
+- Summary: What changed, why, and where (files/paths).
+- Status: What’s done; what’s pending; known risks.
+- Verify: How to run, test, or reproduce.
+- Next: Ordered list of recommended next steps.
 
-- Preambles: Some environments require brief preambles before tool use. Allow concise (1–2 sentence) preambles when the host mandates them.
-- Commits: Frequent commits are preferred, but follow host policy. If commits are restricted, ask for approval before committing.
-- Custom Commands: `/safe-commit`, `/status-check`, `/quick-spec`, `/morning-standup`, `/end-of-day` are conceptual unless implemented by the host. Treat them as specs when no runner exists.
-- Hooks: `.claude/hooks.json` is advisory unless integrated with an execution runner.
-- MCP Availability: Online mode enforced. If MCP servers are unavailable or network is restricted, pause and request guidance; do not proceed offline.
-- Paths: Hardcoded paths (e.g., `/Users/aettefagh/...`) are machine-specific. Adjust for the current system or parameterize.
+## 🔁 Maintenance
+- This file is the canonical master. Keep in a dedicated repo (e.g., `claude-config`) and sync into active projects (symlink, submodule, or copy).
+- Review quarterly; keep rules strict and instructions minimal.
 
-## Security & Privacy
-
-### API Key Management
-- Store in ~/.config/api-keys/.env
-- Never commit API keys
-- Use different keys for different environments
-- Rotate keys regularly
-
-### Code Security
-- Review generated code for security issues
-- Don't blindly execute suggested commands
-- Be cautious with file system operations
-- Validate all inputs
-
----
-
----
-
-**Last updated**: 2025-08-25  
-**Version**: 2.2  
-**Total MCP Servers**: 16 (All Documented)  
-**Custom Commands**: 5  
-**Active Projects**: 10 (5 on GitHub, 5 local)
