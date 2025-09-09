@@ -249,13 +249,13 @@ This prevents back-and-forth debugging and ensures first-time success.
 
 ## Installed Tools & Capabilities
 
-### Task Management (via Task Master)
-- Use `task-master` commands for project organization
-- Parse PRDs with `task-master parse-prd`
-- Track progress with `task-master list` and `task-master next`
-- Expand tasks with `task-master expand --research`
+### Task Management
+- Use built-in todo tracking with Claude Code's TodoWrite tool
+- Break complex tasks into subtasks
+- Track progress throughout sessions
+- Mark tasks complete as they finish
 
-### MCP Servers Available (12 Total)
+### MCP Servers Available (13 Total)
 
 #### Core Infrastructure
 - **filesystem**: Local file operations
@@ -269,12 +269,14 @@ This prevents back-and-forth debugging and ensures first-time success.
 - **exa-search**: Advanced semantic web search and content extraction
 - **playwright**: Browser automation, web scraping, UI testing
 
+#### Productivity
+- **apple-calendar**: Natural language Apple Calendar management for macOS
+- **outlook-mcp**: Comprehensive Microsoft Outlook and Teams integration (75+ tools)
+- **outlook-calendar-mcp**: Windows-specific Outlook Calendar integration
+
 #### AI & Knowledge Management
-- **bee**: Bee AI framework
-- **beemcp**: Bee.computer lifelogging data access
+- **beemcp**: Bee.computer lifelogging data access and integration
 - **memory**: Persistent context and knowledge storage across sessions
-- **task-master-ai**: Project and task management with PRD parsing
-- **bee-supabase**: Integration between Bee.computer data and Supabase database
 
 Additional servers can be installed via `mcp-installer`
 
@@ -323,9 +325,9 @@ When working with Supabase/database projects:
 ```bash
 # Initialize project structure
 mkdir -p {src,tests,docs,configs}
-task-master init
-# Create initial PRD and parse it
-task-master parse-prd docs/prd.md
+# Create initial specifications
+touch docs/specification.md
+# Use Claude Code's TodoWrite for task tracking
 ```
 
 ### Daily Development Flow
@@ -333,12 +335,10 @@ task-master parse-prd docs/prd.md
 # Start of session - validate environment first
 dehc check --mode detailed  # OR dev-env-health-check check --mode detailed
 
-# Start task management
-task-master next
-# During work
-task-master update-subtask --id=<id> --prompt="progress notes"
-# Complete task
-task-master set-status --id=<id> --status=done
+# Start with Claude Code's todo tracking
+# Use /todo to manage tasks
+# Tasks are tracked automatically during work
+# Mark complete as you finish each item
 # Commit changes
 git add -A && git commit -m "feat: complete task <id>"
 ```
@@ -491,10 +491,9 @@ Source from environment file for security
 
 ### Common Commands
 ```bash
-# Task management
-alias tn='task-master next'
-alias tl='task-master list'
-alias td='task-master set-status --status=done --id='
+# Task management (using Claude Code's built-in todo)
+# Use TodoWrite tool for task tracking
+# Tasks persist across session in Claude Code
 
 # Git shortcuts
 alias gs='git status'
