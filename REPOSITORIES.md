@@ -62,14 +62,21 @@
 - **Features**: Caching, research routing, enhanced search capabilities
 - **Next**: Consider GitHub repository
 
-### 9. **Notion-Supabase Integration**
+### 9. **Notion MCP Server**
+- **Repository**: Local only (`~/AI projects/mcp-servers/notion-mcp`)
+- **Status**: 🔄 Scaffolded (read/write tools, needs deps)
+- **Purpose**: Connect to Notion databases/pages via MCP with read/write
+- **Features**: list/search/get/export/create/update/append
+- **Next**: Install deps, set `NOTION_TOKEN`, share pages
+
+### 10. **Notion-Supabase Integration**
 - **Repository**: Local only (~/AI projects/claude-tools/notion-supabase-integration)
 - **Status**: 🔄 Early Development
 - **Purpose**: Sync Notion workspace with Supabase for analytics
 - **Features**: Database sync, search capabilities
 - **Next**: Architecture refinement
 
-### 10. **Real AI Agents**
+### 11. **Real AI Agents**
 - **Repository**: Local only (~/AI projects/claude-tools/real-ai-agents)
 - **Status**: 🔬 Experimental
 - **Purpose**: Multi-agent system with autonomous AI coordination
@@ -78,7 +85,7 @@
 
 ## 📊 **Repository Stats**
 
-### **Total Repositories**: 10
+### **Total Repositories**: 11
 - **Configuration**: 1 (claude-config)
 - **Claude Tools**: 5 (article-to-audio, knowledge-scraper, perplexity-mcp, notion-supabase, real-ai-agents)
 - **Automation Tools**: 3 (bee-supabase, personal-data-lake, enterprise-agents)

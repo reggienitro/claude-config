@@ -2,7 +2,7 @@
 
 ## Installed Tools & Capabilities
 
-### MCP Servers Available (15 Total)
+### MCP Servers Available (16 Total)
 
 #### Core Infrastructure
 - **filesystem**: Local file operations
@@ -22,6 +22,7 @@
 - **memory**: Persistent context and knowledge storage across sessions
 - **task-master-ai**: Project and task management with PRD parsing
 - **bee-supabase**: Integration between Bee.computer data and Supabase database
+- **notion-mcp**: Notion connector with read/write operations (databases/pages)
 
 #### Productivity & Calendar
 - **apple-calendar**: Natural language Apple Calendar management for macOS
@@ -37,6 +38,7 @@ All API keys stored securely in `~/.config/api-keys/.env`:
 - **SUPABASE_URL & SUPABASE_KEY**: Database operations and cloud sync
 - **SUPABASE_PROJECT_REF**: Project reference for MCP server connection
 - **EXA_API_KEY**: Exa semantic search capabilities
+- **NOTION_TOKEN**: Notion Internal Integration token (read/write)
 
 Source from environment file for security
 
@@ -54,6 +56,14 @@ cat ~/AI\ projects/mcp-servers/installed/installed-servers.json
 
 # View MCP server documentation
 ls ~/AI\ projects/mcp-servers/documentation/individual-servers/
+```
+
+### Run Notion MCP (local)
+```bash
+cd "~/AI projects/mcp-servers/notion-mcp"
+python -m venv .venv && source .venv/bin/activate
+pip install -e .
+python -m notion_mcp.server
 ```
 
 ## Adding New MCP Servers Protocol
@@ -103,6 +113,13 @@ When installing or discovering new MCP servers, follow this documentation proces
    - Update total count and version number
 
 This ensures all MCP servers are properly documented and tracked in the centralized system.
+
+## Notion MCP Server Notes
+
+- Location: `~/AI projects/mcp-servers/notion-mcp`
+- Token: Set `NOTION_TOKEN` in `~/.config/api-keys/.env` (preferred)
+- Tools: `list_databases`, `search`, `get_page`, `export_markdown`, `create_page`, `update_page`, `append_blocks`
+- Behavior: Read/write enabled; exercise caution when updating/appending blocks.
 
 ## MCP Server Documentation
 
