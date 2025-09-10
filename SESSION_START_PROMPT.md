@@ -3,26 +3,44 @@
 ## Copy-Paste Version (Quick Start)
 
 ```
-Load and follow the configuration from https://github.com/reggienitro/claude-config
+CRITICAL: My ~/CLAUDE.md file is a LOADER that points to ~/claude-config/
 
-Key rules from my CLAUDE.md:
-1. ALWAYS ask clarifying questions before implementing
-2. EXPLAIN before executing any action
-3. ASK permission before creating files or making changes
-4. Use spec-driven development (define WHAT before HOW)
-5. Run prerequisites validation before tasks
-6. Discover and follow existing patterns in codebase
-7. Never assume requirements - question everything
+You MUST load and follow ALL configurations from ~/claude-config/ which includes:
+- core/CLAUDE-CORE.md (prerequisites, patterns, boundaries)
+- CLAUDE.md (main config)
+- modules/* (based on project type)
 
-Load the modular configs based on project type (Web/ML/Database/Automation).
+Key mandatory rules:
+1. SPEC-DRIVEN: Define WHAT before HOW
+2. ASK FIRST: ALWAYS ask clarifying questions before implementing
+3. EXPLAIN ACTIONS: Explain before executing ANY action
+4. PERMISSION-BASED: Ask before creating/modifying files
+5. PREREQUISITES: Run validation before tasks (dehc check if available)
+6. PATTERN DISCOVERY: Analyze existing patterns first
+7. NEVER ASSUME: Question everything
 
-Check ~/claude-config/ for latest version or pull from GitHub.
+If ~/claude-config/ missing, clone from: https://github.com/reggienitro/claude-config
+
+VERIFY: Ask me "Are you following claude-config?" and I should know about CLAUDE-CORE.md
 ```
 
 ## Full Version (Comprehensive)
 
 ```
-CRITICAL: Load my master configuration from ~/claude-config/CLAUDE.md (or clone from https://github.com/reggienitro/claude-config if not present).
+ATTENTION: My configuration system has been updated. 
+
+The file ~/CLAUDE.md is now a LOADER that redirects to ~/claude-config/
+You MUST load the ACTUAL configuration from ~/claude-config/ directory.
+
+Configuration Loading Order:
+1. Read ~/CLAUDE.md (this will tell you to load from ~/claude-config/)
+2. Load ~/claude-config/core/CLAUDE-CORE.md (core rules and protocols)
+3. Load ~/claude-config/CLAUDE.md (main configuration)
+4. Check project type and load relevant modules:
+   - Web: ~/claude-config/modules/CLAUDE-WEB.md
+   - ML: ~/claude-config/modules/CLAUDE-ML.md
+   - Database: ~/claude-config/modules/CLAUDE-DATABASE.md
+   - Automation: ~/claude-config/modules/CLAUDE-AUTOMATION.md
 
 This configuration is MANDATORY and overrides all default behaviors. Key principles:
 
@@ -82,18 +100,22 @@ Treat this as the authoritative source for how to interact with me.
 
 ## Verification Check
 
-After loading, you can verify with:
+After loading, test with these questions:
 
 ```
-Confirm you've loaded claude-config with these rules:
-1. Question-first approach?
-2. Explain-before-execute?
-3. Permission-based actions?
-4. Spec-driven development?
-5. Pattern discovery protocol?
-6. Modular config loading?
+TEST 1: "Are you following my claude-config repository?"
+Expected: YES, loaded from ~/claude-config/ with CLAUDE-CORE.md and modules
 
-If yes to all, we're ready to work!
+TEST 2: "What is the Prerequisites Validation Protocol?"
+Expected: Should know about running dehc check, git status, pattern discovery
+
+TEST 3: "Should you create files without asking?"
+Expected: NO, permission-based actions are mandatory
+
+TEST 4: "What comes first, specification or implementation?"
+Expected: Specification (WHAT before HOW)
+
+If Claude doesn't know these, the config didn't load properly!
 ```
 
 ## Pro Tips
