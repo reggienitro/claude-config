@@ -1,0 +1,85 @@
+# Environment & Secrets
+.env
+.env.*
+*.env
+!.env.example
+secrets/
+api_keys/
+credentials/
+
+# Backups
+backups/
+*.backup
+*.bak
+*.bak.*
+*.old
+*.orig
+*.v1
+*.v2
+
+# Session Files (temporary)
+SESSION_HANDOFF_*.md
+SESSION_SUMMARY_*.md
+RESTART_PROMPT_*.txt
+*_HANDOFF.md
+*_SUMMARY.md
+
+# IDE & System
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.cache/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+.tmp/
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Local overrides (never commit)
+CLAUDE-LOCAL.md
+CLAUDE-PERSONAL.md
+local-config/
+personal/
+
+# Testing
+test-output/
+coverage/
+.coverage
+.pytest_cache/
+
+# Documentation builds
+docs/_build/
+docs/.doctrees/
+
+# Node (if ever needed)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
