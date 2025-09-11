@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Project Health Monitoring Dashboard
+Project Health Monitoring Dashboard with Enhanced Type Safety
 Tracks status across all 5 GitHub repositories and local projects
 """
 
@@ -9,38 +9,98 @@ import subprocess
 import json
 import datetime
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional, Tuple, TypedDict
+from dataclasses import dataclass, field
+from enum import Enum
 import requests
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv('/Users/aettefagh/.config/api-keys/.env')
 
+class HealthStatus(Enum):
+    """Health status levels"""
+    HEALTHY = "healthy"
+    WARNING = "warning"
+    ERROR = "error"
+    UNKNOWN = "unknown"
+
+class TestStatus(TypedDict):
+    """Type definition for test results"""
+    passed: int
+    failed: int
+    skipped: int
+    total: int
+
+class RepoInfo(TypedDict):
+    """Type definition for repository information"""
+    name: str
+    stars: int
+    forks: int
+    open_issues: int
+    last_push: str
+    status: HealthStatus
+
+class LocalProjectInfo(TypedDict):
+    """Type definition for local project information"""
+    path: str
+    has_git: bool
+    uncommitted_changes: int
+    last_modified: str
+    size_mb: float
+    status: HealthStatus
+
+@dataclass
+class HealthReport:
+    """Complete health report for all projects"""
+    timestamp: datetime.datetime
+    github_repos: Dict[str, RepoInfo] = field(default_factory=dict)
+    local_projects: Dict[str, LocalProjectInfo] = field(default_factory=dict)
+    mcp_servers: Dict[str, bool] = field(default_factory=dict)
+    api_keys: Dict[str, bool] = field(default_factory=dict)
+    overall_health: HealthStatus = HealthStatus.UNKNOWN
+    recommendations: List[str] = field(default_factory=list)
+
 class ProjectHealthMonitor:
-    """Monitor health across all projects"""
+    """Monitor health across all projects with type safety"""
     
-    def __init__(self):
-        self.github_token = os.getenv('GITHUB_PERSONAL_ACCESS_TOKEN')
-        self.repositories = [
+    def __init__(self) -> None:
+        self.github_token: Optional[str] = os.getenv('GITHUB_PERSONAL_ACCESS_TOKEN')
+        self.repositories: List[str] = [
             'reggienitro/claude-config',
             'reggienitro/article-to-audio-extension', 
             'reggienitro/bee-supabase-integration',
             'reggienitro/personal-data-lake',
             'reggienitro/knowledge-scraper'
         ]
-        self.local_projects = {
+        self.local_projects: Dict[str, str] = {
             'claude-config': '/Users/aettefagh/claude-config',
             'article-to-audio': '/Users/aettefagh/AI projects/claude-tools/article-to-audio-extension',
             'bee-supabase': '/Users/aettefagh/AI projects/automation-tools/bee-supabase-integration',
             'personal-data-lake': '/Users/aettefagh/AI projects/automation-tools/personal-data-lake',
             'knowledge-scraper': '/Users/aettefagh/AI projects/claude-tools/knowledge-scraper'
         }
+        self.mcp_servers: List[str] = [
+            'filesystem', 'github', 'supabase', 'beemcp', 
+            'memory', 'web-search', 'exa-search'
+        ]
+        self.required_api_keys: List[str] = [
+            'GITHUB_PERSONAL_ACCESS_TOKEN',
+            'SUPABASE_URL',
+            'SUPABASE_KEY',
+            'BEE_API_TOKEN',
+            'EXA_API_KEY'
+        ]
     
-    def check_github_status(self) -> Dict[str, Any]:
-        """Check GitHub repository status"""
-        repo_status = {}
+    def check_github_status(self) -> Dict[str, RepoInfo]:
+        """Check GitHub repository status with type safety"""
+        repo_status: Dict[str, RepoInfo] = {}
         
-        headers = {
+        if not self.github_token:
+            print("⚠️  GitHub token not found")
+            return repo_status
+        
+        headers: Dict[str, str] = {
             'Authorization': f'token {self.github_token}',
             'Accept': 'application/vnd.github.v3+json'
         }
@@ -48,325 +108,359 @@ class ProjectHealthMonitor:
         for repo in self.repositories:
             try:
                 # Get basic repo info
-                repo_url = f'https://api.github.com/repos/{repo}'
-                response = requests.get(repo_url, headers=headers)
+                url: str = f'https://api.github.com/repos/{repo}'
+                response = requests.get(url, headers=headers)
                 
                 if response.status_code == 200:
                     data = response.json()
-                    
-                    # Get latest commit
-                    commits_url = f'https://api.github.com/repos/{repo}/commits'
-                    commits_response = requests.get(commits_url, headers=headers, params={'per_page': 1})
-                    latest_commit = commits_response.json()[0] if commits_response.status_code == 200 else None
-                    
-                    repo_status[repo] = {
-                        'status': '✅ Healthy',
-                        'last_updated': data.get('updated_at'),
-                        'default_branch': data.get('default_branch'),
-                        'size': data.get('size'),
-                        'language': data.get('language'),
-                        'open_issues': data.get('open_issues_count'),
-                        'latest_commit': {
-                            'sha': latest_commit['sha'][:8] if latest_commit else 'N/A',
-                            'message': latest_commit['commit']['message'][:50] + '...' if latest_commit else 'N/A',
-                            'date': latest_commit['commit']['author']['date'] if latest_commit else 'N/A'
-                        } if latest_commit else None
-                    }
+                    repo_status[repo] = RepoInfo(
+                        name=data['name'],
+                        stars=data['stargazers_count'],
+                        forks=data['forks_count'],
+                        open_issues=data['open_issues_count'],
+                        last_push=data['pushed_at'],
+                        status=self._determine_repo_health(data)
+                    )
                 else:
-                    repo_status[repo] = {
-                        'status': f'❌ Error {response.status_code}',
-                        'error': response.text[:100]
-                    }
+                    repo_status[repo] = RepoInfo(
+                        name=repo.split('/')[-1],
+                        stars=0,
+                        forks=0,
+                        open_issues=0,
+                        last_push='unknown',
+                        status=HealthStatus.ERROR
+                    )
                     
             except Exception as e:
-                repo_status[repo] = {
-                    'status': '❌ Connection Error',
-                    'error': str(e)[:100]
-                }
+                print(f"❌ Error checking {repo}: {e}")
+                repo_status[repo] = RepoInfo(
+                    name=repo.split('/')[-1],
+                    stars=0,
+                    forks=0,
+                    open_issues=0,
+                    last_push='unknown',
+                    status=HealthStatus.ERROR
+                )
         
         return repo_status
     
-    def check_local_git_status(self) -> Dict[str, Any]:
-        """Check local git repository status"""
-        local_status = {}
+    def _determine_repo_health(self, repo_data: Dict[str, Any]) -> HealthStatus:
+        """Determine repository health status"""
+        issues: int = repo_data.get('open_issues_count', 0)
         
-        for project, path in self.local_projects.items():
-            if not os.path.exists(path):
-                local_status[project] = {
-                    'status': '❌ Directory Not Found',
-                    'path': path
-                }
+        # Check last push date
+        last_push_str: str = repo_data.get('pushed_at', '')
+        if last_push_str:
+            last_push = datetime.datetime.fromisoformat(last_push_str.replace('Z', '+00:00'))
+            days_since_push: int = (datetime.datetime.now(datetime.timezone.utc) - last_push).days
+            
+            if days_since_push > 30:
+                return HealthStatus.WARNING
+            if issues > 10:
+                return HealthStatus.WARNING
+            
+        return HealthStatus.HEALTHY
+    
+    def check_local_projects(self) -> Dict[str, LocalProjectInfo]:
+        """Check local project status with type safety"""
+        project_status: Dict[str, LocalProjectInfo] = {}
+        
+        for name, path_str in self.local_projects.items():
+            path = Path(path_str)
+            
+            if not path.exists():
+                project_status[name] = LocalProjectInfo(
+                    path=path_str,
+                    has_git=False,
+                    uncommitted_changes=0,
+                    last_modified='not found',
+                    size_mb=0.0,
+                    status=HealthStatus.ERROR
+                )
                 continue
-                
-            try:
-                # Change to project directory
-                os.chdir(path)
-                
-                # Check if it's a git repo
-                if not os.path.exists('.git'):
-                    local_status[project] = {
-                        'status': '⚠️ Not a Git Repository',
-                        'path': path
-                    }
-                    continue
-                
-                # Get git status
-                status_result = subprocess.run(['git', 'status', '--porcelain'], 
-                                             capture_output=True, text=True)
-                
-                # Get current branch
-                branch_result = subprocess.run(['git', 'branch', '--show-current'], 
-                                             capture_output=True, text=True)
-                
-                # Get last commit
-                commit_result = subprocess.run(['git', 'log', '-1', '--oneline'], 
-                                             capture_output=True, text=True)
-                
-                # Check if ahead/behind remote
-                remote_result = subprocess.run(['git', 'status', '-b', '--porcelain'], 
-                                             capture_output=True, text=True)
-                
-                dirty_files = status_result.stdout.strip().split('\\n') if status_result.stdout.strip() else []
-                dirty_count = len([f for f in dirty_files if f.strip()])
-                
-                # Parse remote status
-                remote_status = "✅ Up to date"
-                if "ahead" in remote_result.stdout:
-                    remote_status = "⚠️ Ahead of remote"
-                elif "behind" in remote_result.stdout:
-                    remote_status = "⚠️ Behind remote"
-                
-                local_status[project] = {
-                    'status': '✅ Clean' if dirty_count == 0 else f'⚠️ {dirty_count} uncommitted changes',
-                    'branch': branch_result.stdout.strip(),
-                    'last_commit': commit_result.stdout.strip(),
-                    'remote_status': remote_status,
-                    'dirty_files': dirty_files[:5] if dirty_count > 0 else [],
-                    'path': path
-                }
-                
-            except Exception as e:
-                local_status[project] = {
-                    'status': '❌ Git Error',
-                    'error': str(e)[:100],
-                    'path': path
-                }
-        
-        return local_status
-    
-    def check_dependencies(self) -> Dict[str, Any]:
-        """Check for dependency issues and security vulnerabilities"""
-        dependency_status = {}
-        
-        for project, path in self.local_projects.items():
-            if not os.path.exists(path):
-                continue
-                
-            try:
-                os.chdir(path)
-                deps = {}
-                
-                # Check Python dependencies
-                if os.path.exists('requirements.txt'):
-                    # Check for outdated packages
-                    pip_check = subprocess.run(['pip', 'list', '--outdated', '--format=json'], 
-                                             capture_output=True, text=True)
-                    
-                    if pip_check.returncode == 0:
-                        outdated = json.loads(pip_check.stdout) if pip_check.stdout.strip() else []
-                        deps['python'] = {
-                            'outdated_count': len(outdated),
-                            'outdated_packages': [p['name'] for p in outdated[:5]]
-                        }
-                
-                # Check Node.js dependencies
-                if os.path.exists('package.json'):
-                    npm_audit = subprocess.run(['npm', 'audit', '--json'], 
-                                             capture_output=True, text=True)
-                    
-                    if npm_audit.returncode in [0, 1]:  # npm audit returns 1 if vulnerabilities found
-                        try:
-                            audit_data = json.loads(npm_audit.stdout)
-                            deps['nodejs'] = {
-                                'vulnerabilities': audit_data.get('metadata', {}).get('vulnerabilities', {}),
-                                'total_deps': audit_data.get('metadata', {}).get('totalDependencies', 0)
-                            }
-                        except:
-                            deps['nodejs'] = {'status': 'Could not parse audit'}
-                
-                dependency_status[project] = deps
-                
-            except Exception as e:
-                dependency_status[project] = {
-                    'error': str(e)[:100]
-                }
-        
-        return dependency_status
-    
-    def check_system_health(self) -> Dict[str, Any]:
-        """Check system-level health indicators"""
-        try:
-            # Check disk space
-            disk_usage = subprocess.run(['df', '-h', '/'], capture_output=True, text=True)
-            disk_lines = disk_usage.stdout.strip().split('\\n')
-            disk_info = disk_lines[1].split() if len(disk_lines) > 1 else []
             
-            # Check memory usage
-            memory_usage = subprocess.run(['vm_stat'], capture_output=True, text=True)
+            # Check git status
+            has_git: bool = (path / '.git').exists()
+            uncommitted: int = 0
             
-            # Check MCP servers (basic check)
-            mcp_status = "✅ Available" if os.path.exists('/Users/aettefagh/.config/api-keys/.env') else "❌ Not configured"
+            if has_git:
+                try:
+                    result = subprocess.run(
+                        ['git', 'status', '--porcelain'],
+                        cwd=path,
+                        capture_output=True,
+                        text=True
+                    )
+                    uncommitted = len(result.stdout.strip().split('\n')) if result.stdout.strip() else 0
+                except:
+                    pass
             
-            return {
-                'disk_usage': {
-                    'total': disk_info[1] if len(disk_info) > 1 else 'N/A',
-                    'used': disk_info[2] if len(disk_info) > 2 else 'N/A',
-                    'available': disk_info[3] if len(disk_info) > 3 else 'N/A',
-                    'percentage': disk_info[4] if len(disk_info) > 4 else 'N/A'
-                },
-                'mcp_servers': mcp_status,
-                'python_version': subprocess.run(['python3', '--version'], capture_output=True, text=True).stdout.strip(),
-                'git_version': subprocess.run(['git', '--version'], capture_output=True, text=True).stdout.strip()
-            }
+            # Get project size
+            size_mb: float = self._get_directory_size(path)
             
-        except Exception as e:
-            return {'error': str(e)}
-    
-    def generate_health_report(self) -> str:
-        """Generate comprehensive health report"""
-        print("🔍 Gathering project health data...")
-        
-        github_status = self.check_github_status()
-        local_status = self.check_local_git_status()
-        dependency_status = self.check_dependencies()
-        system_status = self.check_system_health()
-        
-        report = f"""
-# Project Health Report
-*Generated: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*
-
-## 📊 Overview
-- **Total Projects**: {len(self.repositories)}
-- **GitHub Repositories**: {len([r for r in github_status.values() if '✅' in r.get('status', '')])} healthy
-- **Local Repositories**: {len([r for r in local_status.values() if '✅' in r.get('status', '')])} clean
-
-## 🌐 GitHub Repository Status
-"""
-        
-        for repo, status in github_status.items():
-            project_name = repo.split('/')[-1]
-            report += f"""
-### {project_name}
-- **Status**: {status.get('status', 'Unknown')}
-- **Language**: {status.get('language', 'N/A')}
-- **Last Updated**: {status.get('last_updated', 'N/A')[:10]}
-- **Open Issues**: {status.get('open_issues', 'N/A')}
-"""
-            if status.get('latest_commit'):
-                commit = status['latest_commit']
-                report += f"- **Latest Commit**: {commit['sha']} - {commit['message']}\\n"
-        
-        report += "\\n## 💻 Local Repository Status\\n"
-        
-        for project, status in local_status.items():
-            report += f"""
-### {project}
-- **Status**: {status.get('status', 'Unknown')}
-- **Branch**: {status.get('branch', 'N/A')}
-- **Remote**: {status.get('remote_status', 'N/A')}
-- **Last Commit**: {status.get('last_commit', 'N/A')}
-"""
-            if status.get('dirty_files'):
-                report += f"- **Uncommitted Files**: {', '.join(status['dirty_files'][:3])}{'...' if len(status['dirty_files']) > 3 else ''}\\n"
-        
-        report += "\\n## 📦 Dependency Health\\n"
-        
-        for project, deps in dependency_status.items():
-            if 'error' in deps:
-                report += f"- **{project}**: ❌ {deps['error']}\\n"
+            # Get last modified time
+            last_modified: str = datetime.datetime.fromtimestamp(
+                path.stat().st_mtime
+            ).strftime('%Y-%m-%d %H:%M')
+            
+            # Determine health
+            if uncommitted > 10:
+                status = HealthStatus.WARNING
+            elif not has_git:
+                status = HealthStatus.WARNING
             else:
-                python_deps = deps.get('python', {})
-                nodejs_deps = deps.get('nodejs', {})
+                status = HealthStatus.HEALTHY
+            
+            project_status[name] = LocalProjectInfo(
+                path=path_str,
+                has_git=has_git,
+                uncommitted_changes=uncommitted,
+                last_modified=last_modified,
+                size_mb=size_mb,
+                status=status
+            )
+        
+        return project_status
+    
+    def _get_directory_size(self, path: Path) -> float:
+        """Calculate directory size in MB"""
+        total_size: int = 0
+        try:
+            for item in path.rglob('*'):
+                if item.is_file() and not item.is_symlink():
+                    total_size += item.stat().st_size
+        except:
+            pass
+        return round(total_size / (1024 * 1024), 2)
+    
+    def check_mcp_servers(self) -> Dict[str, bool]:
+        """Check MCP server availability"""
+        server_status: Dict[str, bool] = {}
+        
+        # Check Claude desktop config
+        config_path = Path.home() / 'Library' / 'Application Support' / 'Claude' / 'claude_desktop_config.json'
+        
+        if config_path.exists():
+            try:
+                config = json.loads(config_path.read_text())
+                configured_servers = config.get('mcpServers', {})
                 
-                if python_deps:
-                    outdated = python_deps.get('outdated_count', 0)
-                    status_icon = '⚠️' if outdated > 0 else '✅'
-                    report += f"- **{project} (Python)**: {status_icon} {outdated} outdated packages\\n"
-                
-                if nodejs_deps:
-                    vulns = nodejs_deps.get('vulnerabilities', {})
-                    total_vulns = sum(vulns.values()) if isinstance(vulns, dict) else 0
-                    status_icon = '⚠️' if total_vulns > 0 else '✅'
-                    report += f"- **{project} (Node.js)**: {status_icon} {total_vulns} vulnerabilities\\n"
+                for server in self.mcp_servers:
+                    server_status[server] = server in configured_servers
+            except:
+                for server in self.mcp_servers:
+                    server_status[server] = False
+        else:
+            for server in self.mcp_servers:
+                server_status[server] = False
         
-        report += "\\n## 🖥️ System Health\\n"
+        return server_status
+    
+    def check_api_keys(self) -> Dict[str, bool]:
+        """Check if required API keys are configured"""
+        key_status: Dict[str, bool] = {}
         
-        if 'error' not in system_status:
-            disk = system_status.get('disk_usage', {})
-            report += f"""
-- **Disk Space**: {disk.get('used', 'N/A')} / {disk.get('total', 'N/A')} ({disk.get('percentage', 'N/A')})
-- **MCP Servers**: {system_status.get('mcp_servers', 'N/A')}
-- **Python**: {system_status.get('python_version', 'N/A')}
-- **Git**: {system_status.get('git_version', 'N/A')}
-"""
+        for key_name in self.required_api_keys:
+            key_status[key_name] = bool(os.getenv(key_name))
         
-        report += f"""
-## 🎯 Recommendations
-
-### High Priority
-- **Deploy Article-to-Audio**: Ready for Render deployment
-- **Validate Bee Integration**: Complete final testing
-- **Update Dependencies**: {sum(d.get('python', {}).get('outdated_count', 0) for d in dependency_status.values())} packages need updates
-
-### Medium Priority
-- **Security Review**: Check for vulnerabilities in Node.js packages
-- **Backup Verification**: Ensure all projects are properly backed up
-- **Documentation Updates**: Keep READMEs current with latest changes
-
-### Next Session Focus
-1. Complete active development in other terminals
-2. Deploy article-to-audio to Render
-3. Set up automated dependency updates
-4. Create comprehensive testing framework
-
----
-
-*Health monitoring system: Operational*  
-*All systems: Ready for continued development*
-"""
+        return key_status
+    
+    def run_project_tests(self, project_path: str) -> Optional[TestStatus]:
+        """Run tests for a project and return results"""
+        path = Path(project_path)
+        
+        # Check for test files
+        test_files: List[Path] = list(path.glob('**/test_*.py')) + list(path.glob('**/*_test.py'))
+        
+        if not test_files:
+            return None
+        
+        try:
+            # Run pytest if available
+            result = subprocess.run(
+                ['python', '-m', 'pytest', '--json-report', '--json-report-file=/tmp/test-report.json'],
+                cwd=path,
+                capture_output=True,
+                text=True
+            )
+            
+            # Parse test results
+            if Path('/tmp/test-report.json').exists():
+                report = json.loads(Path('/tmp/test-report.json').read_text())
+                return TestStatus(
+                    passed=report['summary'].get('passed', 0),
+                    failed=report['summary'].get('failed', 0),
+                    skipped=report['summary'].get('skipped', 0),
+                    total=report['summary'].get('total', 0)
+                )
+        except:
+            pass
+        
+        return None
+    
+    def generate_health_report(self) -> HealthReport:
+        """Generate comprehensive health report"""
+        report = HealthReport(timestamp=datetime.datetime.now())
+        
+        # Check all components
+        print("🔍 Checking GitHub repositories...")
+        report.github_repos = self.check_github_status()
+        
+        print("🔍 Checking local projects...")
+        report.local_projects = self.check_local_projects()
+        
+        print("🔍 Checking MCP servers...")
+        report.mcp_servers = self.check_mcp_servers()
+        
+        print("🔍 Checking API keys...")
+        report.api_keys = self.check_api_keys()
+        
+        # Determine overall health
+        error_count: int = 0
+        warning_count: int = 0
+        
+        for repo in report.github_repos.values():
+            if repo['status'] == HealthStatus.ERROR:
+                error_count += 1
+            elif repo['status'] == HealthStatus.WARNING:
+                warning_count += 1
+        
+        for project in report.local_projects.values():
+            if project['status'] == HealthStatus.ERROR:
+                error_count += 1
+            elif project['status'] == HealthStatus.WARNING:
+                warning_count += 1
+        
+        # Generate recommendations
+        if not all(report.api_keys.values()):
+            report.recommendations.append("Configure missing API keys")
+        
+        if not all(report.mcp_servers.values()):
+            report.recommendations.append("Install missing MCP servers")
+        
+        for name, project in report.local_projects.items():
+            if project['uncommitted_changes'] > 5:
+                report.recommendations.append(f"Commit changes in {name}")
+        
+        # Set overall health
+        if error_count > 0:
+            report.overall_health = HealthStatus.ERROR
+        elif warning_count > 2:
+            report.overall_health = HealthStatus.WARNING
+        else:
+            report.overall_health = HealthStatus.HEALTHY
         
         return report
     
-    def save_report(self, report: str) -> str:
-        """Save health report to file"""
-        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-        filename = f'/Users/aettefagh/claude-config/health_report_{timestamp}.md'
+    def display_report(self, report: HealthReport) -> None:
+        """Display health report in formatted output"""
+        print("\n" + "="*60)
+        print(f"📊 PROJECT HEALTH REPORT - {report.timestamp.strftime('%Y-%m-%d %H:%M')}")
+        print("="*60)
         
-        with open(filename, 'w') as f:
-            f.write(report)
+        # Overall status
+        status_emoji: Dict[HealthStatus, str] = {
+            HealthStatus.HEALTHY: "✅",
+            HealthStatus.WARNING: "⚠️",
+            HealthStatus.ERROR: "❌",
+            HealthStatus.UNKNOWN: "❓"
+        }
         
-        return filename
+        print(f"\n🎯 Overall Health: {status_emoji[report.overall_health]} {report.overall_health.value.upper()}")
+        
+        # GitHub repositories
+        print(f"\n📦 GitHub Repositories:")
+        for repo_name, info in report.github_repos.items():
+            print(f"  {status_emoji[info['status']]} {repo_name}")
+            print(f"     ⭐ {info['stars']} | 🍴 {info['forks']} | 🐛 {info['open_issues']} issues")
+        
+        # Local projects
+        print(f"\n💻 Local Projects:")
+        for name, project_info in report.local_projects.items():
+            print(f"  {status_emoji[project_info['status']]} {name}")
+            print(f"     📁 {project_info['size_mb']}MB | {'🔧 Git' if project_info['has_git'] else '⚠️  No Git'} | 📝 {project_info['uncommitted_changes']} uncommitted")
+        
+        # MCP Servers
+        print(f"\n🔌 MCP Servers:")
+        for server, configured in report.mcp_servers.items():
+            print(f"  {'✅' if configured else '❌'} {server}")
+        
+        # API Keys
+        print(f"\n🔑 API Keys:")
+        for key, configured in report.api_keys.items():
+            print(f"  {'✅' if configured else '❌'} {key}")
+        
+        # Recommendations
+        if report.recommendations:
+            print(f"\n💡 Recommendations:")
+            for rec in report.recommendations:
+                print(f"  • {rec}")
+        
+        print("\n" + "="*60)
+    
+    def save_report(self, report: HealthReport, filename: Optional[str] = None) -> Path:
+        """Save report to JSON file"""
+        if not filename:
+            filename = f"health-report-{report.timestamp.strftime('%Y%m%d-%H%M%S')}.json"
+        
+        reports_dir = Path.home() / "AI projects" / "health-reports"
+        reports_dir.mkdir(exist_ok=True)
+        
+        report_path = reports_dir / filename
+        
+        # Convert report to dict
+        report_dict = {
+            'timestamp': report.timestamp.isoformat(),
+            'overall_health': report.overall_health.value,
+            'github_repos': report.github_repos,
+            'local_projects': report.local_projects,
+            'mcp_servers': report.mcp_servers,
+            'api_keys': report.api_keys,
+            'recommendations': report.recommendations
+        }
+        
+        report_path.write_text(json.dumps(report_dict, indent=2))
+        return report_path
 
-def main():
-    """Run health monitoring"""
+def main() -> None:
+    """Main entry point"""
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Monitor project health')
+    parser.add_argument('--save', action='store_true', help='Save report to file')
+    parser.add_argument('--json', action='store_true', help='Output as JSON')
+    parser.add_argument('--quiet', action='store_true', help='Minimal output')
+    
+    args = parser.parse_args()
+    
     monitor = ProjectHealthMonitor()
     report = monitor.generate_health_report()
     
-    print(report)
+    if args.json:
+        report_dict = {
+            'timestamp': report.timestamp.isoformat(),
+            'overall_health': report.overall_health.value,
+            'github_repos': report.github_repos,
+            'local_projects': report.local_projects,
+            'mcp_servers': report.mcp_servers,
+            'api_keys': report.api_keys,
+            'recommendations': report.recommendations
+        }
+        print(json.dumps(report_dict, indent=2))
+    elif not args.quiet:
+        monitor.display_report(report)
     
-    # Save report
-    filename = monitor.save_report(report)
-    print(f"\\n📄 Report saved to: {filename}")
+    if args.save:
+        saved_path = monitor.save_report(report)
+        print(f"\n💾 Report saved to: {saved_path}")
     
-    # Also create latest report link
-    latest_link = '/Users/aettefagh/claude-config/health_report_latest.md'
-    try:
-        if os.path.exists(latest_link):
-            os.remove(latest_link)
-        os.symlink(filename, latest_link)
-        print(f"📄 Latest report: {latest_link}")
-    except:
-        pass
+    # Exit with appropriate code
+    if report.overall_health == HealthStatus.ERROR:
+        exit(2)
+    elif report.overall_health == HealthStatus.WARNING:
+        exit(1)
+    else:
+        exit(0)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Project Creation Script
+Project Creation Script with Enhanced Type Safety
 Creates new projects from templates following organization standards
 """
 
@@ -9,36 +9,68 @@ import shutil
 import argparse
 import subprocess
 import datetime
+import json
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional, Union, Tuple, Any
+from dataclasses import dataclass
+from enum import Enum
+
+class ProjectCategory(Enum):
+    """Valid project categories"""
+    CLAUDE_TOOLS = 'claude-tools'
+    AUTOMATION_TOOLS = 'automation-tools'
+    ML_PROJECTS = 'ml-projects'
+
+@dataclass
+class ProjectConfig:
+    """Configuration for a new project"""
+    name: str
+    category: ProjectCategory
+    template: str
+    description: str = ""
+    git_init: bool = True
+    create_readme: bool = True
 
 class ProjectCreator:
-    """Create new projects from templates"""
+    """Create new projects from templates with type safety"""
     
-    def __init__(self):
-        self.base_path = Path.home() / "AI projects"
-        self.templates_path = Path.home() / "claude-config" / ".claude" / "templates"
-        self.categories = {
-            'claude-tools': 'Claude Code utilities and extensions',
-            'automation-tools': 'Automation and productivity tools', 
-            'ml-projects': 'Machine learning and AI projects'
+    def __init__(self) -> None:
+        self.base_path: Path = Path.home() / "AI projects"
+        self.templates_path: Path = Path.home() / "claude-config" / ".claude" / "templates"
+        self.categories: Dict[str, str] = {
+            ProjectCategory.CLAUDE_TOOLS.value: 'Claude Code utilities and extensions',
+            ProjectCategory.AUTOMATION_TOOLS.value: 'Automation and productivity tools', 
+            ProjectCategory.ML_PROJECTS.value: 'Machine learning and AI projects'
         }
         
-    def create_project(self, name: str, category: str, template: str, description: str = ""):
-        """Create a new project from template"""
+    def validate_category(self, category: str) -> ProjectCategory:
+        """Validate and convert string to ProjectCategory enum"""
+        try:
+            return ProjectCategory(category)
+        except ValueError:
+            valid_categories = [c.value for c in ProjectCategory]
+            raise ValueError(f"Category must be one of: {valid_categories}")
+    
+    def create_project(
+        self, 
+        name: str, 
+        category: str, 
+        template: str, 
+        description: str = ""
+    ) -> Path:
+        """Create a new project from template with type validation"""
         
-        # Validate category
-        if category not in self.categories:
-            raise ValueError(f"Category must be one of: {list(self.categories.keys())}")
+        # Validate and convert category
+        category_enum: ProjectCategory = self.validate_category(category)
         
         # Create project path
-        project_path = self.base_path / category / name
+        project_path: Path = self.base_path / category_enum.value / name
         
         if project_path.exists():
             raise ValueError(f"Project already exists: {project_path}")
         
         print(f"🚀 Creating project: {name}")
-        print(f"📁 Category: {category}")
+        print(f"📁 Category: {category_enum.value}")
         print(f"📋 Template: {template}")
         print(f"📍 Location: {project_path}")
         
@@ -46,363 +78,264 @@ class ProjectCreator:
         project_path.mkdir(parents=True, exist_ok=True)
         
         # Copy template files if template exists
-        template_path = self.templates_path / template
+        template_path: Path = self.templates_path / template
         if template_path.exists():
-            print(f"📄 Copying template files from {template_path}")
-            for item in template_path.iterdir():
-                if item.is_file():
-                    shutil.copy2(item, project_path)
-                elif item.is_dir():
-                    shutil.copytree(item, project_path / item.name)
+            self._copy_template(template_path, project_path)
         else:
-            print(f"ℹ️  Template {template} not found, creating basic structure")
-            self._create_basic_structure(project_path)
+            self._create_default_structure(project_path)
         
-        # Create project-specific files
-        self._create_readme(project_path, name, description, category)
-        self._create_gitignore(project_path, template)
-        self._create_claude_md(project_path, name, category)
+        # Create CLAUDE.md with project info
+        self._create_claude_md(project_path, name, category_enum, description)
         
-        # Initialize git
-        os.chdir(project_path)
-        subprocess.run(['git', 'init'], check=True)
-        subprocess.run(['git', 'add', '.'], check=True)
-        subprocess.run(['git', 'commit', '-m', f'feat: initial {name} project setup'], check=True)
+        # Initialize git if requested
+        self._init_git(project_path)
         
-        print(f"✅ Project {name} created successfully!")
-        print(f"📍 Location: {project_path}")
-        print(f"🔗 Next: cd \"{project_path}\"")
+        # Update registry
+        self._update_registry(name, category_enum, project_path)
         
-        return str(project_path)
+        print(f"✅ Project created successfully!")
+        return project_path
     
-    def _create_basic_structure(self, project_path: Path):
-        """Create basic project structure"""
-        dirs = ['src', 'tests', 'docs', 'config']
-        for dir_name in dirs:
+    def _copy_template(self, template_path: Path, project_path: Path) -> None:
+        """Copy template files to project directory"""
+        for item in template_path.iterdir():
+            if item.name == '.git':
+                continue
+            
+            dest: Path = project_path / item.name
+            if item.is_dir():
+                shutil.copytree(item, dest, dirs_exist_ok=True)
+            else:
+                shutil.copy2(item, dest)
+    
+    def _create_default_structure(self, project_path: Path) -> None:
+        """Create default project structure"""
+        directories: List[str] = ['src', 'tests', 'docs', 'configs']
+        for dir_name in directories:
             (project_path / dir_name).mkdir(exist_ok=True)
-            (project_path / dir_name / '.gitkeep').touch()
+        
+        # Create basic README
+        readme_content: str = f"""# {project_path.name}
+
+## Overview
+{project_path.name} project
+
+## Setup
+```bash
+# Installation instructions here
+```
+
+## Usage
+```bash
+# Usage examples here
+```
+
+## Development
+Created: {datetime.datetime.now().strftime('%Y-%m-%d')}
+"""
+        (project_path / 'README.md').write_text(readme_content)
     
-    def _create_readme(self, project_path: Path, name: str, description: str, category: str):
-        """Create README.md file"""
-        readme_content = f"""# {name.replace('-', ' ').title()}
+    def _create_claude_md(
+        self, 
+        project_path: Path, 
+        name: str, 
+        category: ProjectCategory, 
+        description: str
+    ) -> None:
+        """Create project-specific CLAUDE.md file"""
+        claude_content: str = f"""# Project: {name}
 
-{description or 'Project description'}
+## Category
+{category.value}
 
-## 🎯 Overview
+## Description
+{description or f"A {category.value} project"}
 
-[Describe what this project does]
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Python 3.9+
-- [Other requirements]
-
-### Installation
-```bash
-git clone <repository-url>
-cd {name}
-pip install -r requirements.txt
-```
-
-### Usage
-```bash
-# Basic usage example
-python src/main.py
-```
-
-## 📁 Project Structure
-
+## Project Structure
 ```
 {name}/
-├── src/                 # Source code
-├── tests/               # Test files
-├── docs/                # Documentation
-├── config/              # Configuration files
-├── README.md            # This file
-└── requirements.txt     # Python dependencies
+├── src/         # Source code
+├── tests/       # Test files
+├── docs/        # Documentation
+└── configs/     # Configuration files
 ```
 
-## 🛠️ Development
+## Development Guidelines
+- Follow Python type hints for all functions
+- Write comprehensive tests
+- Document all public APIs
+- Use semantic versioning
 
-### Setup Development Environment
-```bash
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\\Scripts\\activate
-
-# Install dependencies
-pip install -r requirements.txt
-pip install -r requirements-dev.txt
-```
-
-### Running Tests
-```bash
-pytest tests/
-```
-
-### Code Quality
-```bash
-# Format code
-black src/ tests/
-
-# Check types
-mypy src/
-
-# Lint code
-flake8 src/ tests/
-```
-
-## 📊 Status
-
-- 🔄 **Status**: In Development
-- 📋 **Category**: {category}
-- 🏗️ **Template**: Created from project template
-- 📅 **Created**: {datetime.date.today().isoformat()}
-
-## 🤝 Contributing
-
-This is a personal project. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-## 📄 License
-
-Private project - All rights reserved.
-
----
-
-*Created with Claude Code project template*  
-*Last Updated: {datetime.date.today().isoformat()}*
+## Status
+- Created: {datetime.datetime.now().strftime('%Y-%m-%d')}
+- Phase: PLANNING
 """
-        
-        with open(project_path / 'README.md', 'w') as f:
-            f.write(readme_content)
+        (project_path / 'CLAUDE.md').write_text(claude_content)
     
-    def _create_gitignore(self, project_path: Path, template: str):
-        """Create .gitignore file based on template type"""
-        
-        base_ignore = """# Environment & Secrets
-.env
-.env.*
-*.pem
-*.key
-api_keys/
-secrets/
-
-# Python
+    def _init_git(self, project_path: Path) -> None:
+        """Initialize git repository"""
+        try:
+            subprocess.run(['git', 'init'], cwd=project_path, capture_output=True)
+            
+            # Create .gitignore
+            gitignore_content: str = """# Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+env/
 venv/
+.venv
+.env
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
-
-# OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
 
-# Logs
-logs/
+# Project
 *.log
-
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-.tox/
-coverage.xml
-
-# Data files
-data/
-*.db
-*.sqlite
-*.csv
-temp/
-tmp/
-"""
-        
-        template_specific = {
-            'web-app': """
-# Node.js
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Build outputs
 dist/
 build/
-.next/
-""",
-            'ml-project': """
-# ML Models
-models/
-*.pkl
-*.model
-*.h5
-*.pt
-*.pth
-
-# Jupyter
-.ipynb_checkpoints/
-*.ipynb
-
-# Data
-datasets/
-*.parquet
-""",
-            'cli-tool': """
-# Binaries
-bin/
-*.exe
-""",
-            'mcp-server': """
-# MCP specific
-.mcp/
-mcp-logs/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
 """
+            (project_path / '.gitignore').write_text(gitignore_content)
+            
+            subprocess.run(['git', 'add', '.'], cwd=project_path, capture_output=True)
+            subprocess.run(
+                ['git', 'commit', '-m', 'Initial commit'], 
+                cwd=project_path, 
+                capture_output=True
+            )
+        except Exception as e:
+            print(f"⚠️  Git initialization failed: {e}")
+    
+    def _update_registry(
+        self, 
+        name: str, 
+        category: ProjectCategory, 
+        project_path: Path
+    ) -> None:
+        """Update project registry"""
+        registry_file: Path = self.base_path / 'project-registry.json'
+        
+        registry: Dict[str, Any] = {}
+        if registry_file.exists():
+            registry = json.loads(registry_file.read_text())
+        
+        registry[name] = {
+            'category': category.value,
+            'path': str(project_path),
+            'created': datetime.datetime.now().isoformat(),
+            'status': 'active'
         }
         
-        gitignore_content = base_ignore + template_specific.get(template, "")
-        
-        with open(project_path / '.gitignore', 'w') as f:
-            f.write(gitignore_content)
+        registry_file.write_text(json.dumps(registry, indent=2))
     
-    def _create_claude_md(self, project_path: Path, name: str, category: str):
-        """Create project-specific CLAUDE.md"""
-        claude_content = f"""# {name} - Claude Code Configuration
-
-## Project-Specific Settings
-
-This project inherits from the main Claude configuration and adds project-specific customizations.
-
-### Project Info
-- **Name**: {name}
-- **Category**: {category}
-- **Created**: {datetime.date.today().isoformat()}
-- **Template**: Auto-generated
-
-### Development Workflow
-- Use `/safe-commit` for quality-checked commits
-- Follow conventional commit format
-- Test before committing
-- Document changes in README
-
-### Project-Specific Commands
-```bash
-# Quick setup
-./setup.sh
-
-# Run tests
-./test.sh
-
-# Deploy/build
-./deploy.sh
-```
-
-### Dependencies
-- Inherit from main claude-config
-- Project-specific dependencies in requirements.txt
-
-### Notes
-- Add project-specific development notes here
-- Link to related projects
-- Document any special setup requirements
-
----
-
-*Inherits from: ~/claude-config/CLAUDE.md*  
-*Last Updated: {datetime.date.today().isoformat()}*
-"""
+    def list_projects(self) -> Dict[str, List[str]]:
+        """List all existing projects by category"""
+        projects: Dict[str, List[str]] = {
+            category.value: [] for category in ProjectCategory
+        }
         
-        with open(project_path / 'CLAUDE.md', 'w') as f:
-            f.write(claude_content)
+        for category in ProjectCategory:
+            category_path: Path = self.base_path / category.value
+            if category_path.exists():
+                projects[category.value] = [
+                    p.name for p in category_path.iterdir() if p.is_dir()
+                ]
+        
+        return projects
     
-    def list_templates(self):
-        """List available templates"""
-        if not self.templates_path.exists():
-            print("No templates directory found")
-            return
+    def get_project_info(self, name: str) -> Optional[Dict[str, Any]]:
+        """Get information about a specific project"""
+        registry_file: Path = self.base_path / 'project-registry.json'
         
-        templates = [d.name for d in self.templates_path.iterdir() if d.is_dir()]
-        if not templates:
-            print("No templates available")
-            return
+        if not registry_file.exists():
+            return None
         
-        print("📋 Available Templates:")
-        for template in sorted(templates):
-            print(f"  - {template}")
-    
-    def list_categories(self):
-        """List available categories"""
-        print("📁 Available Categories:")
-        for category, description in self.categories.items():
-            print(f"  - {category}: {description}")
+        registry: Dict[str, Any] = json.loads(registry_file.read_text())
+        return registry.get(name)
 
-def main():
-    parser = argparse.ArgumentParser(description='Create new project from template')
-    parser.add_argument('name', help='Project name (kebab-case)')
-    parser.add_argument('category', choices=['claude-tools', 'automation-tools', 'ml-projects'],
-                       help='Project category')
-    parser.add_argument('--template', default='basic', 
-                       help='Template to use (default: basic)')
-    parser.add_argument('--description', default='',
-                       help='Project description')
-    parser.add_argument('--list-templates', action='store_true',
-                       help='List available templates')
-    parser.add_argument('--list-categories', action='store_true', 
-                       help='List available categories')
+def main() -> None:
+    """Main entry point with type-safe argument parsing"""
+    parser = argparse.ArgumentParser(
+        description='Create new projects with enhanced type safety'
+    )
+    
+    subparsers = parser.add_subparsers(dest='command', help='Commands')
+    
+    # Create command
+    create_parser = subparsers.add_parser('create', help='Create a new project')
+    create_parser.add_argument('name', type=str, help='Project name')
+    create_parser.add_argument(
+        '--category', 
+        type=str,
+        choices=[c.value for c in ProjectCategory],
+        required=True,
+        help='Project category'
+    )
+    create_parser.add_argument(
+        '--template', 
+        type=str,
+        default='default',
+        help='Template to use'
+    )
+    create_parser.add_argument(
+        '--description', 
+        type=str,
+        default='',
+        help='Project description'
+    )
+    
+    # List command
+    subparsers.add_parser('list', help='List all projects')
+    
+    # Info command
+    info_parser = subparsers.add_parser('info', help='Get project information')
+    info_parser.add_argument('name', type=str, help='Project name')
     
     args = parser.parse_args()
     
     creator = ProjectCreator()
     
-    if args.list_templates:
-        creator.list_templates()
-        return
+    if args.command == 'create':
+        try:
+            path: Path = creator.create_project(
+                args.name,
+                args.category,
+                args.template,
+                args.description
+            )
+            print(f"\n📂 Project created at: {path}")
+        except Exception as e:
+            print(f"❌ Error: {e}")
+            exit(1)
     
-    if args.list_categories:
-        creator.list_categories()
-        return
+    elif args.command == 'list':
+        projects: Dict[str, List[str]] = creator.list_projects()
+        for category, project_list in projects.items():
+            if project_list:
+                print(f"\n📁 {category}:")
+                for project in project_list:
+                    print(f"  • {project}")
     
-    try:
-        project_path = creator.create_project(
-            args.name, 
-            args.category, 
-            args.template,
-            args.description
-        )
-        print(f"\\n🎉 Success! Project created at: {project_path}")
-        
-    except Exception as e:
-        print(f"❌ Error: {e}")
-        return 1
+    elif args.command == 'info':
+        info: Optional[Dict[str, Any]] = creator.get_project_info(args.name)
+        if info:
+            print(f"\n📋 Project: {args.name}")
+            for key, value in info.items():
+                print(f"  {key}: {value}")
+        else:
+            print(f"❌ Project not found: {args.name}")
+    
+    else:
+        parser.print_help()
 
-if __name__ == "__main__":
-    exit(main())
+if __name__ == '__main__':
+    main()
